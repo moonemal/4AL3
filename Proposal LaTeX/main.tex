@@ -27,8 +27,8 @@
 \title{Group X Progress Report:\\My Group's Project Name}
 
 
-\author{First Author, Second Author, Third Author \\
-  \texttt{\{macid1,macid2,macid3\}@mcmaster.ca} }
+\author{Bhavya Patel, Second Author, Third Author \\
+  \texttt{\{patelb61,macid2,macid3\}@mcmaster.ca} }
 
 %\author{
 %  \textbf{First Author\textsuperscript{1}},
@@ -121,13 +121,13 @@ How are you evaluating your model? What results do you have so far? What are you
 
 \section{Feedback and Plans}
 
+The TA (Shreya) recommended comparing our current MLP using 48-hour features with the same architecture using 72-hour features to see the impact of reduced input features. She also suggested experimenting with L1 and L2 regularization to reduce overfitting, exploring other models, and including all project files with a detailed README.
 
-The TA (Shreya) has given feedback on how to improve our model’s performance. She suggested comparing our current implementation of the MLP architecture using features available within 48 hours of hospitalization with a model using 72 hours of features while keeping the same architecture. This will help determine whether differences in model performance are due to the reduced amount of information (input features) available or other problems in our implementation. We were also told to experiment with different regularization techniques, such as L1 and L2 regularization, to reduce overfitting and improve generalization. Furthermore, the TA recommended including all project files in the submission, along with a detailed README containing descriptions of the files, dependencies, and instructions for running the implementation. Finally, she mentioned potentially trying other models to see if performance can be improved after further experimentation with the multi-task MLP.
+Our initial experiments addressed class imbalance using full inverse-frequency, square-root weighting, and weighting with an exponent of 0.7. Full weighting produced many false positives (127 for \texttt{PREDS\_TAH} and 0 true positives), while square-root weighting predicted almost all negatives. The 0.7 weighting performed better than the baseline on some targets, but all models struggled with rare complications. The full weighting model also showed a lower training loss (under 2) than validation loss (around 3.3), suggesting possible overfitting.
 
-Our initial experiments have focused on addressing class imbalance by exploring different weighting strategies in the multi-task MLP. Full inverse-frequency weighting, square-root inverse-frequency weighting, and intermediate weighting using an exponent of 0.7 were implemented and compared. Full weighting had a lot of false positives 127 false positives for \texttt{PREDS\_TAH} and 0 true positives, while square-root weighting predicted almost all negatives which is similar to the majority-class baseline. The 0.7 weighting did better than the baseline on some targets, but all of the models still have issues identifying rare complications. In the full weighting model, training loss was much lower (dropped to under 2) while validation loss stayed around 3.3, which can mean there is overfitting and emphasizes the importance of investigating regularization.
+Moving forward, we plan to evaluate binary targets using precision, recall, F1-score, and precision-recall AUC as well as doing performance evaluation for each class in the \texttt{LET\_IS} target column. We will investigate L1/L2 regularization, alternative architectures, and cross-validation due to the low number of positive outcomes. After selecting the best configuration using validation results, we will evaluate it on the test set. Finally, we will compare the 48-hour and 72-hour feature sets to determine whether complications can be predicted using only information available within the first 48 hours of hospitalization which addresses our main research question.
 
-For the rest of the weeks, we plan on tuning our models by conducting more detailed comparisons using precision, recall, F1-score, and precision-recall AUC for each binary target column, as well performance evaluation for each class in the \texttt{LET\_IS} target, as accuracy is misleading. We will implement L1 or L2 regularization to investigate their effects on overfitting and improve generalization. We will also experiment with different architectures, as all three initial experiments have used the same MLP architecture, and considering cross-validation as there are a small number of positive outcomes. Once we have selected the best configuration using validation results, we will evaluate it on the test set. Finally, we will compare the 48-hour and 72-hour feature sets to address our main research question: can we accurately predict myocardial infarction complications using only the information available within the first 48 hours of hospitalization?
-
+\iffalse
 \section{Template Notes}
 
 You can remove this section or comment it out, as it only contains instructions for how to use this template. You may use subsections in your document as you find appropriate.
@@ -201,11 +201,11 @@ This an example cross-reference to Equation~\ref{eq:example}. You can also write
 
 
 % \section*{Limitations}
+\fi
 
 \section*{Team Contributions}
 
-Write in this section a few sentences describing the contributions of each team member. What did each member work on? Refer to item 7.
-
+Bhavya Patel worked on intial data analysis and the data preprocessing. She wrote sections: "Dataset" and "Feedback and Plans".
 % Bibliography entries for the entire Anthology, followed by custom entries
 %\bibliography{custom,anthology-overleaf-1,anthology-overleaf-2}
 
