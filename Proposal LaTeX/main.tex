@@ -77,9 +77,19 @@
 
 Here, write a brief introduction to the problem you are solving. This can be adapted from your problem description and motivation from the original proposal. This should be around 0.25-0.5 pages.
 
+
 \section{Related Work}
 
-Here, talk about the related work you encountered for your approach. Cite at least 5 references. Refer to item 2. No one has done exactly your task? Write about the most similar thing you can find. This should be around 0.25-0.5 pages.
+Myocardial infarction, commonly known as a heart attack, may lead to complications and other adverse outcomes. Early identification of vulnerable patients who may develop complications is important for timely medical intervention and treatment planning. However, predicting patient vulnerability can be challenging due to factors such as age, race, medical history, symptoms, and clinical measurements.
+
+Previous research has investigated the use of machine learning and deep learning to predict outcomes following myocardial infarction. Kwon et al. (2019) investigated mortality prediction using data from 22,875 patients, demonstrating the potential of deep learning for health risk prediction. Our project uses the Myocardial Infarction Complications dataset from the UCI Machine Learning Repository, which contains 1,700 patient records, 111 input features, and 12 outcome variables (Golovenkin et al., 2020). The prediction task consists of 11 binary complications and one eight-class categorical outcome.
+
+Yavru and Yilmaz Gunduz (2022) developed a deep learning model using hidden layers, dropout, and skip connections to predict myocardial infarction complications. They investigated training on both original and augmented data, reporting an overall binary accuracy of 92\%. More recently, Makhmudov et al. (2025) proposed a multi-task deep learning approach to predict 11 binary complications and one eight-class categorical outcome using the same dataset. Their work supports the prediction of multiple related clinical outcomes within a shared model.
+
+Multi-task learning is particularly relevant to our approach because it allows models to learn multiple related prediction tasks simultaneously. Caruana (1997) demonstrated that multi-task learning can improve generalization by sharing information between related tasks through common representations, motivating our use of a multi-task multilayer perceptron (MLP).
+
+While previous approaches have investigated myocardial infarction complications using clinical information available through 72 hours of hospitalization, our model focuses on information available within the first 48 hours. Following feature selection and preprocessing, our dataset contains 107 input features. This allows us to investigate the trade-off between earlier complication prediction and predictive performance.
+
 
 \section{Dataset}
 
@@ -182,6 +192,16 @@ The model with the full class weighting increased the number of positive predict
 \subsubsection{Baseline Comparison}
 
 In the baseline model, the majority class is 0 for the 11 binary complications, so the baseline always predicts the patient will not experience the complication. The majority class is 0 for the LET\_IS, so the baseline always predicts class 0. We created another Jupyter notebook that takes all the metrics for all the models and compares them to evaluate which model performed better. The square-root weighting model had the highest mean macro F1-score of 0.4887, when compared to the baseline with 0.4807. But the square-root model did not perform well for predicting the positive complication, and instead the full-weighting model performed better with 0.5523, when compared to the baseline with 0.500. But at the same time, the full-weighting model had a lower macro F1 score and accuracy when compared to the baseline. The square-root model for the multiclass LET\_IS outcome performed the best compared to every model, where the macro F1 score was 0.2511, the accuracy was 0.8588, and the macro precision was 0.3210. However, the full-weighting model had a better macro recall of 0.2981. The intermediate model had the lowest accuracy for both binary complications and LET\_IS outcome, with an accuracy of 0.5533 and 0.0392, respectively. It had a lower score than the baseline model, which calls for further investigation. Overall, the square-root model performed better when we consider the macro F1-score, but it also struggles with the imbalanced data.
+
+\section{Evaluation Strategy}
+
+To evaluate the multi-task learning model, there is a division of the preprocessed dataset for Myocardial Infarction Complications. The data is split into 3 sets: training, validation, and testing, in a 70/15/15 split. Within the training set, there are 1,190 patient sets; our validation and testing sets contain 255 records each. There are 107 input features and 12 outcomes (11 binary complications and 1 eight-class categorical outcome).
+
+Here, we are training a model; the training set is used to take these data points and train the model to see what it can do; validation is used primarily to help monitor the performance and compare the model configurations. Lastly, testing is crucial to ensure the chosen model meets standards. In our implementation, we used a fixed train-validation split instead of k-fold cross-validation.
+
+The evaluation strategy will focus on 4 main things: accuracy, precision, recall, and F1 score for binary complication outcomes. Many complications will occur infrequently; accuracy by itself could be too low to represent a model's ability to identify patients at risk. Looking at specific complications like the \texttt{PREDS\_TAH} complication there are only 14 positive cases within the training set, there are 3 in validation and then lastly 3 in testing set.
+
+A confusion matrix is used to examine all the false negatives and false positives in a dataset; the \texttt{LET\_IS} categorical outcome is used to evaluate a model's prediction. The model is compared against a majority-class baseline to see whether the multi-task learning approach provides improvement over predicting the most common outcome.
 
 \section{Feedback and Plans}
 
