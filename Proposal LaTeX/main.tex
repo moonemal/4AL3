@@ -1,333 +1,312 @@
-\documentclass[11pt]{article}
-
-% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
-% Change to "preprint" to generate a non-anonymous version with page numbers.
-\usepackage[]{acl}
-\usepackage{times}
-\usepackage{latexsym}
-
-% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
-\usepackage[T1]{fontenc}
-% For Vietnamese characters
-% \usepackage[T5]{fontenc}
-% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
-
-% This assumes your files are encoded as UTF8
-\usepackage[utf8]{inputenc}
-\usepackage{microtype}
-\usepackage{inconsolata}
-\usepackage{graphicx}
-\usepackage{float}
-\usepackage{amsmath}
-\usepackage{natbib}
-% If the title and author information does not fit in the area allocated, uncomment the following
+% This is the LaTex style file for *ACL.
+% The official sources can be found at
 %
-%\setlength\titlebox{<dim>}
+%     https://github.com/acl-org/acl-style-files/
 %
-% and set <dim> to something 5cm or larger.
-
-\title{Group 34 Progress Report:\\Prediction of Myocardial Infarction Complications and Outcomes}
-
-
-\author{Bhavya Patel, Anaum Sajjad, Lakysha Moonemalle\\
-  \texttt{\{patelb61,sajjaa7,moonemal\}@mcmaster.ca} }
-
-%\author{
-%  \textbf{First Author\textsuperscript{1}},
-%  \textbf{Second Author\textsuperscript{1,2}},
-%  \textbf{Third T. Author\textsuperscript{1}},
-%  \textbf{Fourth Author\textsuperscript{1}},
-%\\
-%  \textbf{Fifth Author\textsuperscript{1,2}},
-%  \textbf{Sixth Author\textsuperscript{1}},
-%  \textbf{Seventh Author\textsuperscript{1}},
-%  \textbf{Eighth Author \textsuperscript{1,2,3,4}},
-%\\
-%  \textbf{Ninth Author\textsuperscript{1}},
-%  \textbf{Tenth Author\textsuperscript{1}},
-%  \textbf{Eleventh E. Author\textsuperscript{1,2,3,4,5}},
-%  \textbf{Twelfth Author\textsuperscript{1}},
-%\\
-%  \textbf{Thirteenth Author\textsuperscript{3}},
-%  \textbf{Fourteenth F. Author\textsuperscript{2,4}},
-%  \textbf{Fifteenth Author\textsuperscript{1}},
-%  \textbf{Sixteenth Author\textsuperscript{1}},
-%\\
-%  \textbf{Seventeenth S. Author\textsuperscript{4,5}},
-%  \textbf{Eighteenth Author\textsuperscript{3,4}},
-%  \textbf{Nineteenth N. Author\textsuperscript{2,5}},
-%  \textbf{Twentieth Author\textsuperscript{1}}
-%\\
-%\\
-%  \textsuperscript{1}Affiliation 1,
-%  \textsuperscript{2}Affiliation 2,
-%  \textsuperscript{3}Affiliation 3,
-%  \textsuperscript{4}Affiliation 4,
-%  \textsuperscript{5}Affiliation 5
-%\\
-%  \small{
-%    \textbf{Correspondence:} \href{mailto:email@domain}{email@domain}
-%  }
-%}
-
-\begin{document}
-\maketitle
-% \begin{abstract}
-% \end{abstract}
-
-
-\section{Introduction}
-
-Myocardial Infarction, commonly known as a heart attack, may lead to complications and other outcomes. There is a need to be attentive to the early identification of vulnerable patients who may develop complications. It could be incredibly difficult to track how vulnerable someone is to complications because there are other underlying causes such as age, race, medical history, symptoms, and clinical measurements.
-
-We use the Myocardial Infarction Complications dataset from the UCI Machine Learning Repository. This dataset contains 1,700 patient records, 111 input features, and 12 outcome variables (Golovenkin et al., 2020). The prediction task contains 11 binary complications and 1 eight-class categorical outcome.
-
-Our model focuses on the clinical information available after 48 hours, model focuses on clinical information available through the first 48 hours of hospitilization.  After dropping additional columns and preprocessing the feature count will drop to 107 allowing us to investigate trade-offs between earlier prediction and predictive performance.
-
-\section{Related Work}
-
-There has been research aimed to developing stratification for the mortality of patients with acute myocardial infarction. (Kwon et al., 2019) investigated mortality prediction using the data found from 22,875 patients, this demonstrates the potential of deep learning for health risk prediciton.
-
-Yavru and Yılmaz Gündüz (2022) developed a deep learning model using hidden layers, dropout, and skip connections to predict myocardial infarction complications. Investigated training on both original and augmented data, reporting an overall binary accuracy of 92%. Recently, Makhmudov et al. (2025) proposed multi-task deep learning to predict 11 binary complications and one eight-class categorical outcome using the same dataset. Support the prediction of multiple related clinical outcomes.
-
-Multi-task learning is particularly relevant to our approach since it would allow models to learn multiple related prediction tasks at the same time. (Caruana, 1997) demonstrated that multi-task learning improves generalization by sharing information between related tasks through common representations, motivating the MLP.
-
-
-\section{Dataset}
-
-We are using the publicly available \href{https://archive.ics.uci.edu/dataset/579/myocardial+infarction+complications}{Myocardial Infarction Complications dataset} from the UCI Machine Learning Repository. As the dataset is annotated, no additional annotation was done. The dataset contains 1700 patient records with 111 features and 12 target columns. The input features include patient demographics along with clinical measurements and information. The 12 target variables consist of 11 binary outcomes and one 8-class categorical outcome.
-
-\subsection{Feature Selection and Missing Data}
-
-During the initial data analysis, columns corresponding to information available after 48 hours of hospitalization (\texttt{R\_AB\_3\_n}, \texttt{NA\_R\_3\_n}, and \texttt{NOT\_NA\_3\_n}) were dropped, as it did not align with our goal. The missing data distributions for each feature were analyzed and anything with over 50\% missing data was examined closely. Features \texttt{KFK\_BLOOD} and \texttt{IBS\_NASL} were dropped immediately as they had 99.76\% and 95.76\% missing values, respectively.
-
-Two features representing emergency response blood pressure measurements (\texttt{D\_AD\_KBRIG} and \texttt{S\_AD\_KBRIG}) had 63.29\% missing values. Correlation analysis was run between these columns and their corresponding ICU blood pressure measurements: the correlation between \texttt{D\_AD\_KBRIG} and \texttt{D\_AD\_ORIT} was 0.56 while the correlation between \texttt{S\_AD\_KBRIG} vs \texttt{S\_AD\_ORIT} was 0.61. They were not strongly correlated enough to justify removal. A missing analysis was conducted and both columns had missing values for the same instances, so one binary indicator column was created (\texttt{EMR\_RES\_BLOOD}) to represent both columns. \texttt{EMR\_RES\_BLOOD} would have a value of 1 if ER blood pressure measurement was taken or 0 if not taken.
-
-After feature selection was complete, there were 107 input features remaining. These features were analyzed and divided into these categories: numerical, binary, ordinal or partially ordered to determine how to appropriately preprocess them. A correlation analysis was run for the numerical features, however most of the relationships ranged from weak to moderate, and therefore no further features were dropped.
-
-\subsection{Target Distribution and Data Splitting}
-
-Although the target columns contained no missing values, there was a large class imbalance. Most binary target columns had above 1600 ``no'' instances and under 100 ``yes'' instances. The categorical target column ``LET\_IS'' had categories 6 and 7 representing under 2\% of the outcomes. To preserve the distribution of possible outcomes across the train, test and validation sets, the split was done using iterative stratification. As iterative stratification required binary labels, the categorical target column LET\_IS was temporarily one-hot encoded into 8 columns. The indices found in the split were then applied to do the split on the original dataset to allow LET\_IS to remain a categorical column. The dataset was divided into 70\% train, 15\% validation and 15\% test.
-
-\subsection{Missing Value Imputation and Feature Scaling}
-
-Missing value imputation and feature scaling were done after the split to prevent data leakage. The numerical features were imputed using train medians as they are less sensitive to outliers. The categorical columns (binary, ordinal and partially-ordered) columns were imputed using the train modes. These imputation values were then applied to test and validation sets.
-
-For feature scaling, similarly, the scalers were fitted to the train set before being applied to the validation and test sets. The numerical features were scaled using \texttt{StandardScaler}. The ordinal features and the partially ordered feature were scaled using \texttt{MinMaxScaler} to map values between 0 and 1. The binary columns were left as is. The resulting datasets were named: \texttt{X\_train}, \texttt{y\_train}, \texttt{X\_validation}, \texttt{y\_validation}, \texttt{X\_test}, \texttt{y\_test}.
-
-\subsection{Future Considerations}
-
-In the future, the partially ordered column \texttt{ZSN\_A} might be investigated further as it has 2 severity branches and therefore does not follow a single ordinal ranking, but currently it has been left in its original form.
-
-\section{Features}
-
-The multitask MLP receives the preprocessed clinical features as input. Missing values were imputed, and numerical features were scaled before converting them into numerical arrays for model training. Representation learning was performed using two shared hidden layers. The first hidden layer has 64 neurons and the second has 32, and both use ReLU as the activation function. These layers learned non-linear combinations of the input features and are used to predict two separate output branches, which are the binary complications and the multiclass LET\_IS outcome. Both prediction tasks are part of a single neural network, which allows them to share the learned representation. Feature selection was used to remove variables based on their availability during the observation window and according to how many of their values were missing. No separate embedding layers or data augmentation techniques were used.
-
-\section{Implementation}
-
-\subsubsection{Model Architecture}
-
-We implemented a multitask Multilayer Perceptron (MLP) using TensorFlow and the Keras API to predict myocardial infarction complications and outcomes. The preprocessed clinical patient features are provided as input to the model, which consists of two shared fully connected hidden layers. The model layers are discussed in Section~4. The neural network contains two output branches.The first branch predicts the probability of each binary complication, where the branch consists of 11 neurons with sigmoid as the activation function. The second branch predicts the categorical LET\_IS outcome, where the branch consists of 8 neurons with softmax as the activation function. 
-
-\subsubsection{Loss Function}
-
-There is significant class imbalance in the dataset. To address this problem, we use class-weighted cross-entropy loss functions. Without weighted loss functions, the model tends to predict mostly negative outcomes for binary complications and the majority class for \texttt{LET\_IS}.
-
-The positive class weights for binary complications are calculated using:
-
-\begin{equation}
-    w^{+} = \left(\frac{N_{\text{negative}}}{N_{\text{positive}}}\right)^{\alpha}
-\end{equation}
-
-For binary complications, we use the Binary Weighted Cross-Entropy:
-
-\begin{equation}
-    \mathcal{L}_{\text{binary}} =
-    -\left[
-    y\log(p) + (1-y)\log(1-p)
-    \right]
-\end{equation}
-
-For the multiclass outcome, we use the Weighted Sparse Categorical Cross-Entropy:
-
-\begin{equation}
-    \mathcal{L}_{\text{multiclass}}
-    = -w_y\log(p_y)
-\end{equation}
-
-The model combines the two losses by adding them.
-
-We experimented with three weighting strategies, which were full inverse-frequency weighting, square-root weighting and weighting with alpha=0.7, which is the intermediate of the previous two. Full weighting (alpha=1.0) caused the model to predict a large number of positive complications, but also predicted a huge number of false positive complications. The square root weighting (alpha=0.5) only predicted a few true positive complications, causing an increase in the prediction of false negatives. The weighting with alpha=0.7 is intermediate between the previous two weighted loss functions. This approach was able to predict more True positives and fewer false negatives, but more false positives.
-
-\subsubsection{Optimization Technique}
-
-The Adam optimizer was used to train the model with a learning rate of $0.001$ and a batch size of $32$. Adam was selected because it adaptively adjusts parameter updates using the first and second moments of gradient estimates.
-
-TensorFlow performs automatic differentiation and backpropagation to calculate the gradients, which Adam then uses to update the neural network parameters.
-
-The model was trained for a maximum of $50$ epochs with early stopping. Early stopping monitors the validation loss and stops training when the validation loss does not improve for $5$ consecutive epochs. The model weights are then restored from the epoch with the lowest validation loss. This approach helps reduce unnecessary training and overfitting.
-
-Precision and recall were used as training metrics for binary complication prediction, with a classification threshold of $0.5$. Accuracy alone was not selected because it can be misleading when the majority of target labels are negative.
-
-Since the \texttt{LET\_IS} output represents a multiclass classification problem with $8$ possible classes, sparse categorical accuracy was used because the target labels are stored as integer class indices rather than one-hot encoded vectors.
-
-\section{Results}
-
-\subsubsection{Results}
-
-The model with the full class weighting increased the number of positive predictions significantly. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted 92 positive cases; hence, this type of weighting caused overprediction. The validation loss for this model barely decreased over many epochs, where its initial validation loss was 3.423, and the final was 3.289. The Square-root weighting had the opposite effect, with a decreased number of positive complication predictions. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted only 1 positive case. The validation loss over many epochs was comparatively lower than the full weighting model, from initial being 1.856 and the final loss being 1.466. The intermediate weighting with alpha=0.7 had a relatively more balanced result when compared to the previous two models. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted only 13 positive cases. The validation loss was lower than the full weighting model but higher than the square-root model, from an initial value of 2.255 to a final value of 2.007. These experiments provided a basis for further investigation of loss weighting and model generalization.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.3\textwidth]{graphs/Full-weight_graph.png}
-    \caption{Full-Weighted multitask MLP model.}
-    \label{fig:model_architecture}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.3\textwidth]{graphs/Square-root_graph.png}
-    \caption{Square-root Weighted multitask MLP model.}
-    \label{fig:model_architecture}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.3\textwidth]{graphs/Intermediate_graph.png}
-    \caption{Intermediate Weighted multitask MLP model.}
-    \label{fig:model_architecture}
-\end{figure}
-
-\subsubsection{Baseline Comparison}
-
-In the baseline model, the majority class is 0 for the 11 binary complications, so the baseline always predicts the patient will not experience the complication. The majority class is 0 for the LET\_IS, so the baseline always predicts class 0. We created another Jupyter notebook that takes all the metrics for all the models and compares them to evaluate which model performed better. The intermediate weighting model for the 11 binary complications had the highest mean macro F1-score of 0.5153, when compared to the baseline with 0.4807. But the intermediate model did not perform as well for predicting the positive complication, and instead the full-weighting model performed better with 0.5523, when compared to the baseline with 0.500. But at the same time, the full-weighting model had a lower macro F1 score and accuracy when compared to the baseline. The square-root model for the multiclass LET\_IS outcome performed the best compared to every model, where the macro F1 score was 0.2511, the accuracy was 0.8588, and the macro precision was 0.3210. The full-weighting model had a better macro recall of 0.2981; however, it had the lowest accuracy for both binary complications and LET\_IS outcome, with an accuracy of 0.6050 and 0.5725, respectively. It had a lower accuracy score than the baseline model, which calls for further investigation. Overall, the square-root and the intermediate model performed well when we consider the macro F1-score, but it also struggles with the imbalanced data.
-
-\section{Evaluation Strategy}
-
-To evaluate the multi-task learning model, there is a division of the preprocessed dataset for Myocardial Infarction Complications. The data is split into 3 sets: training, validation, and testing, in a 70/15/15 split. Within the training set, there are 1,190 patient sets; our validation and testing sets contain 255 records each. There are 107 input features and 12 outcomes (11 binary complications and 1 eight-class categorical outcome).
-
-Here, we are training a model; the training set is used to take these data points and train the model to see what it can do; validation is used primarily to help monitor the performance and compare the model configurations. Lastly, testing is crucial to ensure the chosen model meets standards. In our implementation, we used a fixed train-validation split instead of k-fold cross-validation.
-
-The evaluation strategy will focus on 4 main things: accuracy, precision, recall, and F1 score for binary complication outcomes. Many complications will occur infrequently; accuracy by itself could be too low to represent a model's ability to identify patients at risk. Looking at specific complications like the \texttt{PREDS\_TAH} complication there are only 14 positive cases within the training set, there are 3 in validation and then lastly 3 in testing set.
-
-A confusion matrix is used to examine all the false negatives and false positives in a dataset; the \texttt{LET\_IS} categorical outcome is used to evaluate a model's prediction. The model is compared against a majority-class baseline to see whether the multi-task learning approach provides improvement over predicting the most common outcome.
-
-\section{Feedback and Plans}
-
-The TA (Shreya) recommended comparing our current MLP using 48-hour features with the same architecture using 72-hour features to see the impact of reduced input features. She also suggested experimenting with L1 and L2 regularization to reduce overfitting, exploring other models, and including all project files with a detailed README.
-
-Our initial experiments addressed class imbalance using full inverse-frequency, square-root weighting, and weighting with an exponent of 0.7. Full weighting produced many false positives (127 for \texttt{PREDS\_TAH} and 0 true positives), while square-root weighting predicted almost all negatives. All models struggled with rare complications. The full weighting model also showed a lower training loss (under 2) than validation loss (around 3.3), suggesting possible overfitting.
-
-Moving forward, we plan to evaluate binary targets using precision, recall, F1-score, and precision-recall AUC as well as doing performance evaluation for each class in the \texttt{LET\_IS} target column. We will investigate L1/L2 regularization, alternative architectures, and cross-validation due to the low number of positive outcomes. After selecting the best configuration using validation results, we will evaluate it on the test set. Finally, we will compare the 48-hour and 72-hour feature sets to determine whether complications can be predicted using only information available within the first 48 hours of hospitalization which addresses our main research question.
-
-\iffalse
-\section{Template Notes}
-
-You can remove this section or comment it out, as it only contains instructions for how to use this template. You may use subsections in your document as you find appropriate.
-
-\subsection{Tables and figures}
-
-See Table~\ref{citation-guide} for an example of a table and its caption.
-See Figure~\ref{fig:experiments} for an example of a figure and its caption.
-
-
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{example-image-golden}
-  \caption{A figure with a caption that runs for more than one line.
-    Example image is usually available through the \texttt{mwe} package
-    without even mentioning it in the preamble.}
-  \label{fig:experiments}
-\end{figure}
-
-\begin{figure*}[t]
-  \includegraphics[width=0.48\linewidth]{example-image-a} \hfill
-  \includegraphics[width=0.48\linewidth]{example-image-b}
-  \caption {A minimal working example to demonstrate how to place
-    two images side-by-side.}
-\end{figure*}
-
-
-\subsection{Citations}
-
-\begin{table*}
-  \centering
-  \begin{tabular}{lll}
-    \hline
-    \textbf{Output}           & \textbf{natbib command} & \textbf{ACL only command} \\
-    \hline
-    \citep{Gusfield:97}       & \verb|\citep|           &                           \\
-    \citealp{Gusfield:97}     & \verb|\citealp|         &                           \\
-    \citet{Gusfield:97}       & \verb|\citet|           &                           \\
-    \citeyearpar{Gusfield:97} & \verb|\citeyearpar|     &                           \\
-    \citeposs{Gusfield:97}    &                         & \verb|\citeposs|          \\
-    \hline
-  \end{tabular}
-  \caption{\label{citation-guide}
-    Citation commands supported by the style file.
+% This package is activated by adding
+%
+%    \usepackage{acl}
+%
+% to your LaTeX file. When submitting your paper for review, add the "review" option:
+%
+%    \usepackage[review]{acl}
+
+\newif\ifacl@finalcopy
+\newif\ifacl@anonymize
+\newif\ifacl@linenumbers
+\newif\ifacl@pagenumbers
+\DeclareOption{final}{\acl@finalcopytrue\acl@anonymizefalse\acl@linenumbersfalse\acl@pagenumbersfalse}
+\DeclareOption{review}{\acl@finalcopyfalse\acl@anonymizetrue\acl@linenumberstrue\acl@pagenumberstrue}
+\DeclareOption{preprint}{\acl@finalcopytrue\acl@anonymizefalse\acl@linenumbersfalse\acl@pagenumberstrue}
+\ExecuteOptions{final} % final copy is the default
+
+% include hyperref, unless user specifies nohyperref option like this:
+% \usepackage[nohyperref]{acl}
+\newif\ifacl@hyperref
+\DeclareOption{hyperref}{\acl@hyperreftrue}
+\DeclareOption{nohyperref}{\acl@hyperreffalse}
+\ExecuteOptions{hyperref} % default is to use hyperref
+\ProcessOptions\relax
+
+\typeout{Conference Style for ACL}
+
+\usepackage{xcolor}
+
+\ifacl@linenumbers
+  % Add draft line numbering via the lineno package
+  % https://texblog.org/2012/02/08/adding-line-numbers-to-documents/
+  \usepackage[switch,mathlines]{lineno}
+
+  % Line numbers in gray Helvetica 8pt
+  \font\aclhv = phvb at 8pt
+  \renewcommand\linenumberfont{\aclhv\color{lightgray}}
+
+  % Zero-fill line numbers
+  % NUMBER with left flushed zeros  \fillzeros[<WIDTH>]<NUMBER>
+  \newcount\cv@tmpc@ \newcount\cv@tmpc
+  \def\fillzeros[#1]#2{\cv@tmpc@=#2\relax\ifnum\cv@tmpc@<0\cv@tmpc@=-\cv@tmpc@\fi
+    \cv@tmpc=1 %
+    \loop\ifnum\cv@tmpc@<10 \else \divide\cv@tmpc@ by 10 \advance\cv@tmpc by 1 \fi
+      \ifnum\cv@tmpc@=10\relax\cv@tmpc@=11\relax\fi \ifnum\cv@tmpc@>10 \repeat
+    \ifnum#2<0\advance\cv@tmpc1\relax-\fi
+    \loop\ifnum\cv@tmpc<#1\relax0\advance\cv@tmpc1\relax\fi \ifnum\cv@tmpc<#1 \repeat
+    \cv@tmpc@=#2\relax\ifnum\cv@tmpc@<0\cv@tmpc@=-\cv@tmpc@\fi \relax\the\cv@tmpc@}%
+  \renewcommand\thelinenumber{\fillzeros[3]{\arabic{linenumber}}}
+  \AtBeginDocument{\linenumbers}
+
+  \setlength{\linenumbersep}{1.6cm}
+
+  % Bug: An equation with $$ ... $$ isn't numbered, nor is the previous line.
+
+  % Patch amsmath commands so that the previous line and the equation itself
+  % are numbered. Bug: multline has an extra line number.
+  % https://tex.stackexchange.com/questions/461186/how-to-use-lineno-with-amsmath-align
+  \usepackage{etoolbox} %% <- for \pretocmd, \apptocmd and \patchcmd
+
+  \newcommand*\linenomathpatch[1]{%
+    \expandafter\pretocmd\csname #1\endcsname {\linenomath}{}{}%
+    \expandafter\pretocmd\csname #1*\endcsname {\linenomath}{}{}%
+    \expandafter\apptocmd\csname end#1\endcsname {\endlinenomath}{}{}%
+    \expandafter\apptocmd\csname end#1*\endcsname {\endlinenomath}{}{}%
   }
-\end{table*}
+  \newcommand*\linenomathpatchAMS[1]{%
+    \expandafter\pretocmd\csname #1\endcsname {\linenomathAMS}{}{}%
+    \expandafter\pretocmd\csname #1*\endcsname {\linenomathAMS}{}{}%
+    \expandafter\apptocmd\csname end#1\endcsname {\endlinenomath}{}{}%
+    \expandafter\apptocmd\csname end#1*\endcsname {\endlinenomath}{}{}%
+  }
 
-Table~\ref{citation-guide} shows the syntax supported by the style files.
-We encourage you to use the natbib styles.
-You can use the command \verb|\citet| (cite in text) to get ``author (year)'' citations, like this citation to a paper by \citet{Gusfield:97}.
-You can use the command \verb|\citep| (cite in parentheses) to get ``(author, year)'' citations \citep{Gusfield:97}.
-You can use the command \verb|\citealp| (alternative cite without parentheses) to get ``author, year'' citations, which is useful for using citations within parentheses (e.g. \citealp{Gusfield:97}).
+  %% Definition of \linenomathAMS depends on whether the mathlines option is provided
+  \expandafter\ifx\linenomath\linenomathWithnumbers
+    \let\linenomathAMS\linenomathWithnumbers
+    %% The following line gets rid of an extra line numbers at the bottom:
+    \patchcmd\linenomathAMS{\advance\postdisplaypenalty\linenopenalty}{}{}{}
+  \else
+    \let\linenomathAMS\linenomathNonumbers
+  \fi
 
-\subsection{References}
-
-\nocite{Ando2005,andrew2007scalable,rasooli-tetrault-2015}
-
-Many websites where you can find academic papers also allow you to export a bib file for citation or bib formatted entry. Copy this into the \texttt{custom.bib} and you will be able to cite the paper in the \LaTeX{}. You can remove the example entries.
-
-\subsection{Equations}
-
-An example equation is shown below:
-\begin{equation}
-  \label{eq:example}
-  A = \pi r^2
-\end{equation}
-
-Labels for equation numbers, sections, subsections, figures and tables
-are all defined with the \verb|\label{label}| command and cross references
-to them are made with the \verb|\ref{label}| command.
-This an example cross-reference to Equation~\ref{eq:example}. You can also write equations inline, like this: $A=\pi r^2$.
-
-
-% \section*{Limitations}
+  \AtBeginDocument{%
+    \linenomathpatch{equation}%
+    \linenomathpatchAMS{gather}%
+    \linenomathpatchAMS{multline}%
+    \linenomathpatchAMS{align}%
+    \linenomathpatchAMS{alignat}%
+    \linenomathpatchAMS{flalign}%
+  }
+\else
+  % Hack to ignore these commands, which review mode puts into the .aux file.
+  \newcommand{\@LN@col}[1]{}
+  \newcommand{\@LN}[2]{}
+  \newcommand{\nolinenumbers}{}
 \fi
 
-\section*{Team Contributions}
+\PassOptionsToPackage{a4paper,margin=2.5cm,heightrounded=true}{geometry}
+\RequirePackage{geometry}
 
-Bhavya Patel worked on intial data analysis and the data preprocessing. She wrote sections: "Dataset" and "Feedback and Plans".
-Anaum Sajjad worked on the model implementation. She wrote the sections: "Features", "Implementation", and "Results". Lakysha Moonemalle worked on the baseline implementation. She wrote the sections: Introduction, Related work and Evaluation Strategy.  
-% Bibliography entries for the entire Anthology, followed by custom entries
-%\bibliography{custom,anthology-overleaf-1,anthology-overleaf-2}
+\setlength\columnsep{0.6cm}
+\newlength\titlebox
+\setlength\titlebox{11\baselineskip}
+% \titlebox should be a multiple of \baselineskip so that
+% column height remaining fits an exact number of lines of text
 
-\section*{AI disclosure}
-ChatGPT was used by all the members of the group for boilerplate code snippets and helping with tough to determine decisions. We used 20 prompts which resulted in  86.4g of C02 emissions?
+\flushbottom \twocolumn \sloppy
 
-% Custom bibliography entries only
-\bibliography{custom}
-% Kwon et al. (2019)
-\citet{kwon2019}
+% We're never going to need a table of contents, so just flush it to
+% save space --- suggested by drstrip@sandia-2
+\def\addcontentsline#1#2#3{}
 
-% (Golovenkin et al., 2020)
-\citep{golovenkin2020}
+\ifacl@pagenumbers
+    \pagenumbering{arabic}
+\else
+    \thispagestyle{empty}
+    \pagestyle{empty}
+\fi
 
-% Yavru and Yılmaz Gündüz (2022)
-\citet{yavru2022}
+%% Title and Authors %%
 
-% Makhmudov et al. (2025)
-\citet{makhmudov2025}
+\let\Thanks\thanks % \Thanks and \thanks used to be different, but keep this for backwards compatibility.
 
-% Caruana (1997)
-\citet{caruana1997}
+\newcommand\outauthor{%
+    \begin{tabular}[t]{c}
+    \ifacl@anonymize
+        \bfseries Anonymous ACL submission
+    \else
+        \bfseries\@author
+    \fi
+    \end{tabular}}
 
-% \appendix
+% Mostly taken from deproc.
+\AtBeginDocument{
+\def\maketitle{\par
+ \begingroup
+   \def\thefootnote{\fnsymbol{footnote}}
+   \twocolumn[\@maketitle]
+   \@thanks
+ \endgroup
+ \setcounter{footnote}{0}
+ \let\maketitle\relax
+ \let\@maketitle\relax
+ \gdef\@thanks{}\gdef\@author{}\gdef\@title{}\let\thanks\relax}
+\def\@maketitle{\vbox to \titlebox{\hsize\textwidth
+ \linewidth\hsize \vskip 0.125in minus 0.125in \centering
+ {\Large\bfseries \@title \par} \vskip 0.2in plus 1fil minus 0.1in
+ {\def\and{\unskip\enspace{\rmfamily and}\enspace}%
+  \def\And{\end{tabular}\hss \egroup \hskip 1in plus 2fil
+           \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bfseries}%
+  \def\AND{\end{tabular}\hss\egroup \hfil\hfil\egroup
+          \vskip 0.25in plus 1fil minus 0.125in
+           \hbox to \linewidth\bgroup\large \hfil\hfil
+             \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bfseries}
+  \hbox to \linewidth\bgroup\large \hfil\hfil
+    \hbox to 0pt\bgroup\hss
+  \outauthor
+   \hss\egroup
+    \hfil\hfil\egroup}
+  \vskip 0.3in plus 2fil minus 0.1in
+}}
+}
 
-% \section{Example Appendix}
-% \label{sec:appendix}
+% margins and font size for abstract
+\renewenvironment{abstract}%
+  {\begin{center}\large\textbf{\abstractname}\end{center}%
+    \begin{list}{}%
+      {\setlength{\rightmargin}{0.6cm}%
+        \setlength{\leftmargin}{0.6cm}}%
+      \item[]\ignorespaces%
+      \@setsize\normalsize{12pt}\xpt\@xpt
+  }%
+  {\unskip\end{list}}
 
-% This is an appendix.
+% Resizing figure and table captions - SL
+% Support for interacting with the caption, subfigure, and subcaption packages - SL
+\RequirePackage{caption}
+\DeclareCaptionFont{10pt}{\fontsize{10pt}{12pt}\selectfont}
+\captionsetup{font=10pt}
 
-\end{document}
+\RequirePackage{natbib}
+% for citation commands in the .tex, authors can use:
+% \citep, \citet, and \citeyearpar for compatibility with natbib, or
+% \cite, \newcite, and \shortcite for compatibility with older ACL .sty files
+\renewcommand\cite{\citep}  % to get "(Author Year)" with natbib
+\newcommand\shortcite{\citeyearpar}% to get "(Year)" with natbib
+\newcommand\newcite{\citet} % to get "Author (Year)" with natbib
+\newcommand{\citeposs}[1]{\citeauthor{#1}'s (\citeyear{#1})} % to get "Author's (Year)"
+
+\bibliographystyle{acl_natbib}
+
+% Bibliography
+
+% Don't put a label in the bibliography at all.  Just use the unlabeled format
+% instead.
+\def\thebibliography#1{\vskip\parskip%
+\vskip\baselineskip%
+\def\baselinestretch{1}%
+\ifx\@currsize\normalsize\@normalsize\else\@currsize\fi%
+\vskip-\parskip%
+\vskip-\baselineskip%
+\section*{References\@mkboth
+ {References}{References}}\list
+ {}{\setlength{\labelwidth}{0pt}\setlength{\leftmargin}{\parindent}
+ \setlength{\itemindent}{-\parindent}}
+ \def\newblock{\hskip .11em plus .33em minus -.07em}
+ \sloppy\clubpenalty4000\widowpenalty4000
+ \sfcode`\.=1000\relax}
+\let\endthebibliography=\endlist
+
+
+% Allow for a bibliography of sources of attested examples
+\def\thesourcebibliography#1{\vskip\parskip%
+\vskip\baselineskip%
+\def\baselinestretch{1}%
+\ifx\@currsize\normalsize\@normalsize\else\@currsize\fi%
+\vskip-\parskip%
+\vskip-\baselineskip%
+\section*{Sources of Attested Examples\@mkboth
+ {Sources of Attested Examples}{Sources of Attested Examples}}\list
+ {}{\setlength{\labelwidth}{0pt}\setlength{\leftmargin}{\parindent}
+ \setlength{\itemindent}{-\parindent}}
+ \def\newblock{\hskip .11em plus .33em minus -.07em}
+ \sloppy\clubpenalty4000\widowpenalty4000
+ \sfcode`\.=1000\relax}
+\let\endthesourcebibliography=\endlist
+
+% sections with less space
+\def\section{\@startsection {section}{1}{\z@}{-2.0ex plus
+    -0.5ex minus -.2ex}{1.5ex plus 0.3ex minus .2ex}{\large\bfseries\raggedright}}
+\def\subsection{\@startsection{subsection}{2}{\z@}{-1.8ex plus
+    -0.5ex minus -.2ex}{0.8ex plus .2ex}{\normalsize\bfseries\raggedright}}
+%% changed by KO to - values to get the initial parindent right
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}{-1.5ex plus
+   -0.5ex minus -.2ex}{0.5ex plus .2ex}{\normalsize\bfseries\raggedright}}
+\def\paragraph{\@startsection{paragraph}{4}{\z@}{1.5ex plus
+   0.5ex minus .2ex}{-1em}{\normalsize\bfseries}}
+\def\subparagraph{\@startsection{subparagraph}{5}{\parindent}{1.5ex plus
+   0.5ex minus .2ex}{-1em}{\normalsize\bfseries}}
+
+% Footnotes
+\footnotesep 6.65pt %
+\skip\footins 9pt plus 4pt minus 2pt
+\def\footnoterule{\kern-3pt \hrule width 5pc \kern 2.6pt }
+\setcounter{footnote}{0}
+
+% Lists and paragraphs
+\parindent 1em
+\topsep 4pt plus 1pt minus 2pt
+\partopsep 1pt plus 0.5pt minus 0.5pt
+\itemsep 2pt plus 1pt minus 0.5pt
+\parsep 2pt plus 1pt minus 0.5pt
+
+\leftmargin 2em \leftmargini\leftmargin \leftmarginii 2em
+\leftmarginiii 1.5em \leftmarginiv 1.0em \leftmarginv .5em \leftmarginvi .5em
+\labelwidth\leftmargini\advance\labelwidth-\labelsep \labelsep 5pt
+
+\def\@listi{\leftmargin\leftmargini}
+\def\@listii{\leftmargin\leftmarginii
+   \labelwidth\leftmarginii\advance\labelwidth-\labelsep
+   \topsep 2pt plus 1pt minus 0.5pt
+   \parsep 1pt plus 0.5pt minus 0.5pt
+   \itemsep \parsep}
+\def\@listiii{\leftmargin\leftmarginiii
+    \labelwidth\leftmarginiii\advance\labelwidth-\labelsep
+    \topsep 1pt plus 0.5pt minus 0.5pt
+    \parsep \z@ \partopsep 0.5pt plus 0pt minus 0.5pt
+    \itemsep \topsep}
+\def\@listiv{\leftmargin\leftmarginiv
+     \labelwidth\leftmarginiv\advance\labelwidth-\labelsep}
+\def\@listv{\leftmargin\leftmarginv
+     \labelwidth\leftmarginv\advance\labelwidth-\labelsep}
+\def\@listvi{\leftmargin\leftmarginvi
+     \labelwidth\leftmarginvi\advance\labelwidth-\labelsep}
+
+\abovedisplayskip 7pt plus2pt minus5pt%
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip  0pt plus3pt%
+\belowdisplayshortskip  4pt plus3pt minus3pt%
+
+% Less leading in most fonts (due to the narrow columns)
+% The choices were between 1-pt and 1.5-pt leading
+\def\@normalsize{\@setsize\normalsize{11pt}\xpt\@xpt}
+\def\small{\@setsize\small{10pt}\ixpt\@ixpt}
+\def\footnotesize{\@setsize\footnotesize{10pt}\ixpt\@ixpt}
+\def\scriptsize{\@setsize\scriptsize{8pt}\viipt\@viipt}
+\def\tiny{\@setsize\tiny{7pt}\vipt\@vipt}
+\def\large{\@setsize\large{14pt}\xiipt\@xiipt}
+\def\Large{\@setsize\Large{16pt}\xivpt\@xivpt}
+\def\LARGE{\@setsize\LARGE{20pt}\xviipt\@xviipt}
+\def\huge{\@setsize\huge{23pt}\xxpt\@xxpt}
+\def\Huge{\@setsize\Huge{28pt}\xxvpt\@xxvpt}
+
+% The hyperref manual (section 9) says hyperref should be loaded after natbib
+\ifacl@hyperref
+  \PassOptionsToPackage{breaklinks}{hyperref}
+  \RequirePackage{hyperref}
+  % make links dark blue
+  \definecolor{darkblue}{rgb}{0, 0, 0.5}
+  \hypersetup{colorlinks=true, citecolor=darkblue, linkcolor=darkblue, urlcolor=darkblue}
+\else
+  % This definition is used if the hyperref package is not loaded.
+  % It provides a backup, no-op definiton of \href.
+  % This is necessary because \href command is used in the acl_natbib.bst file.
+  \def\href#1#2{{#2}}
+  \usepackage{url}
+\fi

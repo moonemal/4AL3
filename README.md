@@ -24,7 +24,7 @@ We are currently investigating different class-weighting strategies to address t
 | `square_root_weighting.csv` | Evaluation results for the square-root weighting model. |
 | `intermediate_weighting.csv` | Evaluation results for the intermediate weighting model. |
 | `preprocessed_data/` | Directory containing the six preprocessed files used by the model notebooks. Can use to look at what preprocessed data looks like. |
-| `Proposal LaTeX/` | Contains the LaTeX source files, bibliography and style files, and compiled project report. CONTAINS THE FINAL PROJECT PROGRESS PDF REPORT. |
+ | `Proposal LaTeX/` | Contains the LaTeX source files, bibliography and style files, images of graphs, and compiled project report. CONTAINS THE FINAL PROJECT PROGRESS PDF REPORT. |
 
 ## Dependencies
 
