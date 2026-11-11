@@ -83,7 +83,7 @@ Here, talk about the related work you encountered for your approach. Cite at lea
 
 \section{Dataset}
 
-We are using the publicly available Myocardial Infarction Complications dataset from the UCI Machine Learning Repository. As the dataset is annotated, no additional annotation was done. The dataset contains 1700 patient records with 111 features and 12 target columns. The input features include patient demographics along with clinical measurements and information. The 12 target variables consist of 11 binary outcomes and one 8-class categorical outcome.
+We are using the publicly available \href{https://archive.ics.uci.edu/dataset/579/myocardial+infarction+complications}{Myocardial Infarction Complications dataset} from the UCI Machine Learning Repository. As the dataset is annotated, no additional annotation was done. The dataset contains 1700 patient records with 111 features and 12 target columns. The input features include patient demographics along with clinical measurements and information. The 12 target variables consist of 11 binary outcomes and one 8-class categorical outcome.
 
 \subsection{Feature Selection and Missing Data}
 
@@ -105,7 +105,7 @@ For feature scaling, similarly, the scalers were fitted to the train set before 
 
 \subsection{Future Considerations}
 
-In the future, the partially ordered column \texttt{ZSN\_A} might be investigated further as it has 2 severity branches and therefore does not follow a single ordinal ranking. It might be split into 2 features, each representing a ``severity branch''. For the current preprocessing, it has been left in its original form.
+In the future, the partially ordered column \texttt{ZSN\_A} might be investigated further as it has 2 severity branches and therefore does not follow a single ordinal ranking, but currently it has been left in its original form.
 
 \section{Features}
 
