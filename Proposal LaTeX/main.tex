@@ -17,7 +17,7 @@
 \usepackage{microtype}
 \usepackage{inconsolata}
 \usepackage{graphicx}
-
+\usepackage{amsmath}
 % If the title and author information does not fit in the area allocated, uncomment the following
 %
 %\setlength\titlebox{<dim>}
@@ -27,7 +27,7 @@
 \title{Group X Progress Report:\\My Group's Project Name}
 
 
-\author{Bhavya Patel, Second Author, Third Author \\
+\author{Bhavya Patel, Anaum Sajjad, Third Author \\
   \texttt{\{patelb61,macid2,macid3\}@mcmaster.ca} }
 
 %\author{
@@ -109,21 +109,85 @@ In the future, the partially ordered column \texttt{ZSN\_A} might be investigate
 
 \section{Features}
 
-Describe any features you used for your model, or how your data was input to your model. Are you doing feature engineering or feature selection? Are you learning embeddings? Is it all part of one neural network? Refer to item 2. This may range from 0.25 pages to 0.5 pages.
+The multitask MLP receives the preprocessed clinical features as input. Missing values were imputed, and numerical features were scaled before converting them into numerical arrays for model training. Representation learning was performed using two shared hidden layers. The first hidden layer has 64 neurons and the second has 32, and both use ReLU as the activation function. These layers learned non-linear combinations of the input features and are used to predict two separate output branches, which are the binary complications and the multiclass LET\_IS outcome. Both prediction tasks are part of a single neural network, which allows them to share the learned representation. Feature selection was used to remove variables based on their availability during the observation window and according to how many of their values were missing. No separate embedding layers or data augmentation techniques were used.
 
 \section{Implementation}
 
-Describe your model and implementation here. Refer to item 4. This may take around a page.
+\subsubsection{Model Architecture}
+
+We implemented a multitask Multilayer Perceptron (MLP) using TensorFlow and the Keras API to predict myocardial infarction complications and outcomes. The preprocessed clinical patient features are provided as input to the model, which consists of two shared fully connected hidden layers. The model layers are discussed in Section~4. The neural network contains two output branches.The first branch predicts the probability of each binary complication, where the branch consists of 11 neurons with sigmoid as the activation function. The second branch predicts the categorical LET\_IS outcome, where the branch consists of 8 neurons with softmax as the activation function. 
+
+\subsubsection{Loss Function}
+
+There is significant class imbalance in the dataset. To address this problem, we use class-weighted cross-entropy loss functions. Without weighted loss functions, the model tends to predict mostly negative outcomes for binary complications and the majority class for \texttt{LET\_IS}.
+
+The positive class weights for binary complications are calculated using:
+
+\begin{equation}
+    w^{+} = \left(\frac{N_{\text{negative}}}{N_{\text{positive}}}\right)^{\alpha}
+\end{equation}
+
+where $N_j^{-}$ represents the number of negative samples and $N_j^{+}$ represents the number of positive samples for complication $j$.
+
+For binary complications, we use the Binary Weighted Cross-Entropy:
+
+\begin{equation}
+    \mathcal{L}_{\text{binary}} =
+    -\left[
+    y\log(p) + (1-y)\log(1-p)
+    \right]
+\end{equation}
+
+where $y_j \in \{0,1\}$ is the true label for complication $j$, and $p_j$ is its predicted probability. A label of 0 indicates that the complication does not occur, while a label of 1 indicates that it does occur.
+
+For the multiclass outcome, we use the Weighted Sparse Categorical Cross-Entropy:
+
+\begin{equation}
+    \mathcal{L}_{\text{multiclass}}
+    = -w_y\log(p_y)
+\end{equation}
+
+where $w_y$ represents the weight assigned to the true class $y$, and $p_y$ is the predicted probability of that class.
+
+The model combines the two losses using:
+
+\begin{equation}
+    \mathcal{L}_{\text{total}}
+    = \mathcal{L}_{\text{binary}}
+    + \mathcal{L}_{\text{multiclass}}
+\end{equation}
+
+The Adam optimizer minimizes the combined loss by updating the shared hidden layers and the two output branches.
+
+We experimented with three weighting strategies, which were full inverse-frequency weighting, square-root weighting and weighting with alpha=0.7, which is the intermediate of the previous two. Full weighting (alpha=1.0) caused the model to predict a large number of positive complications, but also predicted a huge number of false positive complications. The square root weighting (alpha=0.5) only predicted a few true positive complications, causing an increase in the prediction of false negatives. The weighting with alpha=0.7 is intermediate between the previous two weighted loss functions. This approach was able to predict more True positives and fewer false negatives, but more false positives.
+
+\subsubsection{Optimization Technique}
+
+The Adam optimizer was used to train the model with a learning rate of $0.001$ and a batch size of $32$. Adam was selected because it adaptively adjusts parameter updates using the first and second moments of gradient estimates.
+
+TensorFlow performs automatic differentiation and backpropagation to calculate the gradients, which Adam then uses to update the neural network parameters.
+
+The model was trained for a maximum of $50$ epochs with early stopping. Early stopping monitors the validation loss and stops training when the validation loss does not improve for $5$ consecutive epochs. The model weights are then restored from the epoch with the lowest validation loss. This approach helps reduce unnecessary training and overfitting.
+
+Precision and recall were used as training metrics for binary complication prediction, with a classification threshold of $0.5$. Accuracy alone was not selected because it can be misleading when the majority of target labels are negative.
+
+Since the \texttt{LET\_IS} output represents a multiclass classification problem with $8$ possible classes, sparse categorical accuracy was used because the target labels are stored as integer class indices rather than one-hot encoded vectors.
 
 \section{Results and Evaluation}
 
-How are you evaluating your model? What results do you have so far? What are your baselines? Refer to item 5. This may take around 0.5 pages.
+\subsubsection{Results}
+
+The model with the full class weighting increased the number of positive predictions significantly. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted 92 positive cases; hence, this type of weighting caused overprediction. The validation loss for this model barely decreased over many epochs, where its initial validation loss was 3.423, and the final was 3.289. The Square-root weighting had the opposite effect, with a decreased number of positive complication predictions. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted only 1 positive case. The validation loss over many epochs was comparatively lower than the full weighting model, from initial being 1.856 and the final loss being 1.466. The intermediate weighting with alpha=0.7 had a relatively more balanced result when compared to the previous two models. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted only 13 positive cases. The validation loss was lower than the full weighting model but higher than the square-root model, from an initial value of 2.255 to a final value of 2.007. These experiments provided a basis for further investigation of loss weighting and model generalization.
+
+\subsubsection{Baseline Comparison}
+
+In the baseline model, the majority class is 0 for the 11 binary complications, so the baseline always predicts the patient will not experience the complication. The majority class is 0 for the LET\_IS, so the baseline always predicts class 0. We created another Jupyter notebook that takes all the metrics for all the models and compares them to evaluate which model performed better. The square-root weighting model had the highest mean macro F1-score of 0.4887, when compared to the baseline with 0.4807. But the square-root model did not perform well for predicting the positive complication, and instead the full-weighting model performed better with 0.5523, when compared to the baseline with 0.500. But at the same time, the full-weighting model had a lower macro F1 score and accuracy when compared to the baseline. The square-root model for the multiclass LET\_IS outcome performed the best compared to every model, where the macro F1 score was 0.2511, the accuracy was 0.8588, and the macro precision was 0.3210. However, the full-weighting model had a better macro recall of 0.2981. The intermediate model had the lowest accuracy for both binary complications and LET\_IS outcome, with an accuracy of 0.5533 and 0.0392, respectively. It had a lower score than the baseline model, which calls for further investigation. Overall, the square-root model performed better when we consider the macro F1-score, but it also struggles with the imbalanced data.
 
 \section{Feedback and Plans}
 
 The TA (Shreya) recommended comparing our current MLP using 48-hour features with the same architecture using 72-hour features to see the impact of reduced input features. She also suggested experimenting with L1 and L2 regularization to reduce overfitting, exploring other models, and including all project files with a detailed README.
 
-Our initial experiments addressed class imbalance using full inverse-frequency, square-root weighting, and weighting with an exponent of 0.7. Full weighting produced many false positives (127 for \texttt{PREDS\_TAH} and 0 true positives), while square-root weighting predicted almost all negatives. The 0.7 weighting performed better than the baseline on some targets, but all models struggled with rare complications. The full weighting model also showed a lower training loss (under 2) than validation loss (around 3.3), suggesting possible overfitting.
+Our initial experiments addressed class imbalance using full inverse-frequency, square-root weighting, and weighting with an exponent of 0.7. Full weighting produced many false positives (127 for \texttt{PREDS\_TAH} and 0 true positives), while square-root weighting predicted almost all negatives. All models struggled with rare complications. The full weighting model also showed a lower training loss (under 2) than validation loss (around 3.3), suggesting possible overfitting.
 
 Moving forward, we plan to evaluate binary targets using precision, recall, F1-score, and precision-recall AUC as well as doing performance evaluation for each class in the \texttt{LET\_IS} target column. We will investigate L1/L2 regularization, alternative architectures, and cross-validation due to the low number of positive outcomes. After selecting the best configuration using validation results, we will evaluate it on the test set. Finally, we will compare the 48-hour and 72-hour feature sets to determine whether complications can be predicted using only information available within the first 48 hours of hospitalization which addresses our main research question.
 
@@ -206,6 +270,7 @@ This an example cross-reference to Equation~\ref{eq:example}. You can also write
 \section*{Team Contributions}
 
 Bhavya Patel worked on intial data analysis and the data preprocessing. She wrote sections: "Dataset" and "Feedback and Plans".
+Anaum Sajjad worked on the model implementation. She write the sections: "Features", "Implementation", and "Results and Evaluation".
 % Bibliography entries for the entire Anthology, followed by custom entries
 %\bibliography{custom,anthology-overleaf-1,anthology-overleaf-2}
 
