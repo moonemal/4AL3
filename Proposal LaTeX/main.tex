@@ -73,22 +73,22 @@
 % \begin{abstract}
 % \end{abstract}
 
+
 \section{Introduction}
 
-Here, write a brief introduction to the problem you are solving. This can be adapted from your problem description and motivation from the original proposal. This should be around 0.25-0.5 pages.
+Myocardial Infarction, commonly known as a heart attack, may lead to complications and other outcomes. There is a need to be attentive to the early identification of vulnerable patients who may develop complications. It could be incredibly difficult to track how vulnerable someone is to complications because there are other underlying causes such as age, race, medical history, symptoms, and clinical measurements.
 
+We use the Myocardial Infarction Complications dataset from the UCI Machine Learning Repository. This dataset contains 1,700 patient records, 111 input features, and 12 outcome variables (Golovenkin et al., 2020). The prediction task contains 11 binary complications and 1 eight-class categorical outcome.
+
+Our model focuses on the clinical information available after 72 hours, model focuses on clinical information available through the first 48 hours of hospitilization. Input features will reduce to 108 allowing us to investigate trade-offs between earlier prediction and predictive performance.
 
 \section{Related Work}
 
-Myocardial infarction, commonly known as a heart attack, may lead to complications and other adverse outcomes. Early identification of vulnerable patients who may develop complications is important for timely medical intervention and treatment planning. However, predicting patient vulnerability can be challenging due to factors such as age, race, medical history, symptoms, and clinical measurements.
+There has been research aimed to developing stratification for the mortality of patients with acute myocardial infarction. (Kwon et al., 2019) investigated mortality prediction using the data found from 22,875 patients, this demonstrates the potential of deep learning for health risk prediciton.
 
-Previous research has investigated the use of machine learning and deep learning to predict outcomes following myocardial infarction. Kwon et al. (2019) investigated mortality prediction using data from 22,875 patients, demonstrating the potential of deep learning for health risk prediction. Our project uses the Myocardial Infarction Complications dataset from the UCI Machine Learning Repository, which contains 1,700 patient records, 111 input features, and 12 outcome variables (Golovenkin et al., 2020). The prediction task consists of 11 binary complications and one eight-class categorical outcome.
+Yavru and Yılmaz Gündüz (2022) developed a deep learning model using hidden layers, dropout, and skip connections to predict myocardial infarction complications. Investigated training on both original and augmented data, reporting an overall binary accuracy of 92%. Recently, Makhmudov et al. (2025) proposed multi-task deep learning to predict 11 binary complications and one eight-class categorical outcome using the same dataset. Support the prediction of multiple related clinical outcomes.
 
-Yavru and Yilmaz Gunduz (2022) developed a deep learning model using hidden layers, dropout, and skip connections to predict myocardial infarction complications. They investigated training on both original and augmented data, reporting an overall binary accuracy of 92\%. More recently, Makhmudov et al. (2025) proposed a multi-task deep learning approach to predict 11 binary complications and one eight-class categorical outcome using the same dataset. Their work supports the prediction of multiple related clinical outcomes within a shared model.
-
-Multi-task learning is particularly relevant to our approach because it allows models to learn multiple related prediction tasks simultaneously. Caruana (1997) demonstrated that multi-task learning can improve generalization by sharing information between related tasks through common representations, motivating our use of a multi-task multilayer perceptron (MLP).
-
-While previous approaches have investigated myocardial infarction complications using clinical information available through 72 hours of hospitalization, our model focuses on information available within the first 48 hours. Following feature selection and preprocessing, our dataset contains 107 input features. This allows us to investigate the trade-off between earlier complication prediction and predictive performance.
+Multi-task learning is particularly relevant to our approach since it would allow models to learn multiple related prediction tasks at the same time. (Caruana , 1997) demonstrated that multi-task learning improves generalization by sharing information between related tasks through common representations, motivating the MLP.
 
 
 \section{Dataset}
