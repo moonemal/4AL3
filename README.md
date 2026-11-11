@@ -47,5 +47,5 @@ pip install pandas numpy matplotlib ucimlrepo iterative-stratification scikit-le
 
 ## Notes
 
-Please run the data_preprocessing_actual.ipynb file before any of the model files. Please look at the model implementation notebook outputs for graphs and related analysis. 
+Please run the data_preprocessing_actual.ipynb file before any of the model files. Please look at the model implementation notebook outputs for graphs and related analysis. Please run the baseline-model_comparison.ipynb at the very end as it uses the other Jupyter files' output for comparison.
 
