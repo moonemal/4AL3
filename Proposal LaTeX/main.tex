@@ -17,18 +17,20 @@
 \usepackage{microtype}
 \usepackage{inconsolata}
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage{amsmath}
+\usepackage{natbib}
 % If the title and author information does not fit in the area allocated, uncomment the following
 %
 %\setlength\titlebox{<dim>}
 %
 % and set <dim> to something 5cm or larger.
 
-\title{Group 34 Progress Report:\\My Group's Project Name}
+\title{Group 34 Progress Report:\\Prediction of Myocardial Infarction Complications and Outcomes}
 
 
 \author{Bhavya Patel, Anaum Sajjad, Lakysha Moonemalle\\
-  \texttt{\{patelb61,macid2,moonemal\}@mcmaster.ca} }
+  \texttt{\{patelb61,sajjaa7,moonemal\}@mcmaster.ca} }
 
 %\author{
 %  \textbf{First Author\textsuperscript{1}},
@@ -137,8 +139,6 @@ The positive class weights for binary complications are calculated using:
     w^{+} = \left(\frac{N_{\text{negative}}}{N_{\text{positive}}}\right)^{\alpha}
 \end{equation}
 
-where $N_j^{-}$ represents the number of negative samples and $N_j^{+}$ represents the number of positive samples for complication $j$.
-
 For binary complications, we use the Binary Weighted Cross-Entropy:
 
 \begin{equation}
@@ -148,8 +148,6 @@ For binary complications, we use the Binary Weighted Cross-Entropy:
     \right]
 \end{equation}
 
-where $y_j \in \{0,1\}$ is the true label for complication $j$, and $p_j$ is its predicted probability. A label of 0 indicates that the complication does not occur, while a label of 1 indicates that it does occur.
-
 For the multiclass outcome, we use the Weighted Sparse Categorical Cross-Entropy:
 
 \begin{equation}
@@ -157,17 +155,7 @@ For the multiclass outcome, we use the Weighted Sparse Categorical Cross-Entropy
     = -w_y\log(p_y)
 \end{equation}
 
-where $w_y$ represents the weight assigned to the true class $y$, and $p_y$ is the predicted probability of that class.
-
-The model combines the two losses using:
-
-\begin{equation}
-    \mathcal{L}_{\text{total}}
-    = \mathcal{L}_{\text{binary}}
-    + \mathcal{L}_{\text{multiclass}}
-\end{equation}
-
-The Adam optimizer minimizes the combined loss by updating the shared hidden layers and the two output branches.
+The model combines the two losses by adding them.
 
 We experimented with three weighting strategies, which were full inverse-frequency weighting, square-root weighting and weighting with alpha=0.7, which is the intermediate of the previous two. Full weighting (alpha=1.0) caused the model to predict a large number of positive complications, but also predicted a huge number of false positive complications. The square root weighting (alpha=0.5) only predicted a few true positive complications, causing an increase in the prediction of false negatives. The weighting with alpha=0.7 is intermediate between the previous two weighted loss functions. This approach was able to predict more True positives and fewer false negatives, but more false positives.
 
@@ -183,15 +171,36 @@ Precision and recall were used as training metrics for binary complication predi
 
 Since the \texttt{LET\_IS} output represents a multiclass classification problem with $8$ possible classes, sparse categorical accuracy was used because the target labels are stored as integer class indices rather than one-hot encoded vectors.
 
-\section{Results and Evaluation}
+\section{Results}
 
 \subsubsection{Results}
 
 The model with the full class weighting increased the number of positive predictions significantly. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted 92 positive cases; hence, this type of weighting caused overprediction. The validation loss for this model barely decreased over many epochs, where its initial validation loss was 3.423, and the final was 3.289. The Square-root weighting had the opposite effect, with a decreased number of positive complication predictions. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted only 1 positive case. The validation loss over many epochs was comparatively lower than the full weighting model, from initial being 1.856 and the final loss being 1.466. The intermediate weighting with alpha=0.7 had a relatively more balanced result when compared to the previous two models. For instance, the FIBR\_PREDS contains 26 positive cases, and the model predicted only 13 positive cases. The validation loss was lower than the full weighting model but higher than the square-root model, from an initial value of 2.255 to a final value of 2.007. These experiments provided a basis for further investigation of loss weighting and model generalization.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.3\textwidth]{graphs/Full-weight_graph.png}
+    \caption{Full-Weighted multitask MLP model.}
+    \label{fig:model_architecture}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.3\textwidth]{graphs/Square-root_graph.png}
+    \caption{Square-root Weighted multitask MLP model.}
+    \label{fig:model_architecture}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.3\textwidth]{graphs/Intermediate_graph.png}
+    \caption{Intermediate Weighted multitask MLP model.}
+    \label{fig:model_architecture}
+\end{figure}
+
 \subsubsection{Baseline Comparison}
 
-In the baseline model, the majority class is 0 for the 11 binary complications, so the baseline always predicts the patient will not experience the complication. The majority class is 0 for the LET\_IS, so the baseline always predicts class 0. We created another Jupyter notebook that takes all the metrics for all the models and compares them to evaluate which model performed better. The square-root weighting model had the highest mean macro F1-score of 0.4887, when compared to the baseline with 0.4807. But the square-root model did not perform well for predicting the positive complication, and instead the full-weighting model performed better with 0.5523, when compared to the baseline with 0.500. But at the same time, the full-weighting model had a lower macro F1 score and accuracy when compared to the baseline. The square-root model for the multiclass LET\_IS outcome performed the best compared to every model, where the macro F1 score was 0.2511, the accuracy was 0.8588, and the macro precision was 0.3210. However, the full-weighting model had a better macro recall of 0.2981. The intermediate model had the lowest accuracy for both binary complications and LET\_IS outcome, with an accuracy of 0.5533 and 0.0392, respectively. It had a lower score than the baseline model, which calls for further investigation. Overall, the square-root model performed better when we consider the macro F1-score, but it also struggles with the imbalanced data.
+In the baseline model, the majority class is 0 for the 11 binary complications, so the baseline always predicts the patient will not experience the complication. The majority class is 0 for the LET\_IS, so the baseline always predicts class 0. We created another Jupyter notebook that takes all the metrics for all the models and compares them to evaluate which model performed better. The intermediate weighting model for the 11 binary complications had the highest mean macro F1-score of 0.5153, when compared to the baseline with 0.4807. But the intermediate model did not perform as well for predicting the positive complication, and instead the full-weighting model performed better with 0.5523, when compared to the baseline with 0.500. But at the same time, the full-weighting model had a lower macro F1 score and accuracy when compared to the baseline. The square-root model for the multiclass LET\_IS outcome performed the best compared to every model, where the macro F1 score was 0.2511, the accuracy was 0.8588, and the macro precision was 0.3210. The full-weighting model had a better macro recall of 0.2981; however, it had the lowest accuracy for both binary complications and LET\_IS outcome, with an accuracy of 0.6050 and 0.5725, respectively. It had a lower accuracy score than the baseline model, which calls for further investigation. Overall, the square-root and the intermediate model performed well when we consider the macro F1-score, but it also struggles with the imbalanced data.
 
 \section{Evaluation Strategy}
 
@@ -290,7 +299,7 @@ This an example cross-reference to Equation~\ref{eq:example}. You can also write
 \section*{Team Contributions}
 
 Bhavya Patel worked on intial data analysis and the data preprocessing. She wrote sections: "Dataset" and "Feedback and Plans".
-Anaum Sajjad worked on the model implementation. She write the sections: "Features", "Implementation", and "Results and Evaluation". Lakysha Moonemalle worked on the baseline implementation. She wrote the sections: Introduction, Related work and Evaluation Strategy.  
+Anaum Sajjad worked on the model implementation. She wrote the sections: "Features", "Implementation", and "Results". Lakysha Moonemalle worked on the baseline implementation. She wrote the sections: Introduction, Related work and Evaluation Strategy.  
 % Bibliography entries for the entire Anthology, followed by custom entries
 %\bibliography{custom,anthology-overleaf-1,anthology-overleaf-2}
 
@@ -310,6 +319,7 @@ Anaum Sajjad worked on the model implementation. She write the sections: "Featur
 
 % Caruana (1997)
 \citet{caruana1997}
+
 % \appendix
 
 % \section{Example Appendix}
